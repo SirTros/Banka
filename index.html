@@ -6,9 +6,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>STCB Bank v3</title>
+<title>STCB Bank</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 
@@ -17,26 +18,19 @@ box-sizing:border-box;
 font-family:Segoe UI,Arial;
 }
 
-
 body{
-
 margin:0;
 background:#050914;
 color:white;
-
 }
-
 
 
 #login{
-
 height:100vh;
 display:flex;
-justify-content:center;
 align-items:center;
-
+justify-content:center;
 }
-
 
 
 .box{
@@ -52,22 +46,15 @@ box-shadow:0 20px 60px #000;
 }
 
 
-
 .logo{
-
 font-size:70px;
 text-align:center;
-
 }
-
 
 
 h1{
-
 color:#00c8ff;
-
 }
-
 
 
 input{
@@ -83,16 +70,15 @@ border-radius:15px;
 }
 
 
-
 button{
 
 width:100%;
 padding:14px;
 margin-top:12px;
-background:linear-gradient(135deg,#006cff,#00c8ff);
-color:white;
 border:0;
 border-radius:15px;
+background:linear-gradient(135deg,#006cff,#00c8ff);
+color:white;
 font-weight:bold;
 cursor:pointer;
 
@@ -101,9 +87,7 @@ cursor:pointer;
 
 
 #bank{
-
 display:none;
-
 }
 
 
@@ -111,11 +95,8 @@ display:none;
 .header{
 
 height:70px;
-display:flex;
-align-items:center;
-padding:20px;
 background:#081120;
-border-bottom:1px solid #20385d;
+padding:20px;
 font-size:25px;
 color:#00c8ff;
 
@@ -129,15 +110,13 @@ display:flex;
 gap:10px;
 padding:10px;
 background:#081120;
-overflow:auto;
 
 }
 
 
-
 .nav button{
 
-min-width:110px;
+min-width:100px;
 margin:0;
 
 }
@@ -150,7 +129,6 @@ display:none;
 padding:20px;
 
 }
-
 
 
 .page.active{
@@ -175,21 +153,18 @@ margin-bottom:20px;
 
 .money{
 
-font-size:42px;
+font-size:40px;
 color:#00ff88;
 
 }
 
 
 
-/* STCB vlastní upozornění */
-
 #alerts{
 
 position:fixed;
 top:20px;
 right:20px;
-z-index:9999;
 
 }
 
@@ -199,29 +174,22 @@ z-index:9999;
 
 background:#101c32;
 border:1px solid #00c8ff;
-padding:18px;
-border-radius:18px;
+padding:15px;
+border-radius:15px;
 margin-bottom:10px;
-box-shadow:0 10px 40px #000;
 
 }
 
 
-
 </style>
 
-
 </head>
-
 
 
 <body>
 
 
-
 <div id="alerts"></div>
-
-
 
 
 <div id="login">
@@ -231,23 +199,17 @@ box-shadow:0 10px 40px #000;
 
 
 <div class="logo">
-
 🏦
-
 </div>
 
 
 <h1>
-
 STCB Bank
-
 </h1>
 
 
 <p>
-
 Přihlášení klienta
-
 </p>
 
 
@@ -258,21 +220,17 @@ Přihlášení klienta
 
 
 <button onclick="login()">
-
 Přihlásit
-
 </button>
 
 
 <p id="loginMsg"></p>
 
 
-
 </div>
 
 
 </div>
-
 
 
 
@@ -281,40 +239,32 @@ Přihlásit
 
 
 <div class="header">
-
 🏦 STCB Bank
-
 </div>
 
 
 
 <div class="nav">
 
-
 <button onclick="openPage('home')">
 🏠 Domů
 </button>
-
 
 <button onclick="openPage('send')">
 💸 Poslat
 </button>
 
-
 <button onclick="openPage('qr')">
 📷 QR
 </button>
-
 
 <button onclick="openPage('history')">
 📜 Historie
 </button>
 
-
 <button onclick="openPage('profile')">
 👤 Profil
 </button>
-
 
 </div>
 
@@ -326,45 +276,74 @@ Přihlásit
 
 <div class="card">
 
-
 <h1>
-
 Vítej 👋
-
 </h1>
 
 
 <h2 id="userName">
-
 -
-
 </h2>
 
 
-
 <h2>
-
 💰 Zůstatek
-
 </h2>
 
 
 <div id="balance" class="money">
-
 0 Kč
-
-</div>
-
-
-
 </div>
 
 
 </div>
 
 
+</div>
 
-<!-- pokračování 2/5 -->
+<!-- PROFIL -->
+
+
+<div id="profile" class="page">
+
+
+<div class="card">
+
+
+<h1>
+👤 Profil
+</h1>
+
+
+<p>
+Jméno:
+<b id="profileName">
+-
+</b>
+</p>
+
+
+<p>
+Účet:
+<b id="profileAccount">
+-
+</b>
+</p>
+
+
+<button onclick="logout()">
+
+🚪 Odhlásit
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
 
 
 
@@ -386,24 +365,30 @@ let currentClient=null;
 
 
 
+
 function stcbAlert(text){
 
 
-let a=document.createElement("div");
+let box=document.createElement("div");
 
-a.className="alert";
 
-a.innerHTML=text;
+box.className="alert";
+
+
+box.innerHTML=text;
+
 
 
 document.getElementById("alerts")
-.appendChild(a);
+.appendChild(box);
 
 
 
 setTimeout(()=>{
 
-a.remove();
+
+box.remove();
+
 
 },3000);
 
@@ -413,15 +398,27 @@ a.remove();
 
 
 
+
+
+
+
 function openPage(id){
 
 
 document.querySelectorAll(".page")
-.forEach(x=>x.classList.remove("active"));
+
+.forEach(page=>{
+
+
+page.classList.remove("active");
+
+
+});
 
 
 
 document.getElementById(id)
+
 .classList.add("active");
 
 
@@ -429,54 +426,9 @@ document.getElementById(id)
 
 
 
-</script>
-
-<!-- PROFIL -->
-
-<div id="profile" class="page">
-
-
-<div class="card">
-
-
-<h1>
-👤 Profil
-</h1>
-
-
-<p>
-Jméno:
-<b id="profileName">-</b>
-</p>
 
 
 
-<p>
-Číslo účtu:
-<b id="profileAccount">-</b>
-</p>
-
-
-
-<button onclick="logout()">
-
-🚪 Odhlásit
-
-</button>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<script>
 
 
 async function login(){
@@ -485,7 +437,6 @@ async function login(){
 
 let name =
 document.getElementById("name").value;
-
 
 
 let pin =
@@ -516,7 +467,6 @@ return;
 
 
 
-
 const {data,error}=await supabaseClient
 
 .from("clients")
@@ -534,10 +484,13 @@ const {data,error}=await supabaseClient
 
 
 
+console.log(data,error);
+
+
+
 
 
 if(error || !data){
-
 
 
 msg.innerHTML="❌ Špatné jméno nebo PIN";
@@ -553,7 +506,9 @@ return;
 
 
 
+
 currentClient=data;
+
 
 
 
@@ -566,6 +521,7 @@ document.getElementById("login")
 
 document.getElementById("bank")
 .style.display="block";
+
 
 
 
@@ -588,17 +544,23 @@ updateAccount();
 function updateAccount(){
 
 
+
 if(!currentClient)return;
 
 
 
 
+
 document.getElementById("userName")
+
 .innerHTML=currentClient.name;
 
 
 
+
+
 document.getElementById("balance")
+
 .innerHTML=
 
 Number(currentClient.money)
@@ -606,12 +568,20 @@ Number(currentClient.money)
 
 
 
+
+
+
 document.getElementById("profileName")
+
 .innerHTML=currentClient.name;
 
 
 
+
+
+
 document.getElementById("profileAccount")
+
 .innerHTML=
 
 currentClient.account ||
@@ -630,8 +600,8 @@ currentClient.account ||
 
 
 
-
 function logout(){
+
 
 
 currentClient=null;
@@ -639,11 +609,13 @@ currentClient=null;
 
 
 document.getElementById("bank")
+
 .style.display="none";
 
 
 
 document.getElementById("login")
+
 .style.display="flex";
 
 
@@ -658,10 +630,10 @@ document.getElementById("pin").value="";
 
 
 
-
 </script>
 
-<!-- POSÍLÁNÍ -->
+<!-- POSÍLÁNÍ PENĚZ -->
+
 
 <div id="send" class="page">
 
@@ -674,8 +646,10 @@ document.getElementById("pin").value="";
 </h1>
 
 
+
 <input id="receiverName"
 placeholder="👤 Jméno příjemce">
+
 
 
 <input id="sendAmount"
@@ -691,10 +665,13 @@ placeholder="💰 Částka Kč">
 </button>
 
 
+
 <p id="sendMsg"></p>
 
 
 </div>
+
+
 
 
 
@@ -714,7 +691,7 @@ placeholder="💰 Částka Kč">
 
 <input id="sendPin"
 type="password"
-placeholder="Tvůj PIN">
+placeholder="🔐 Tvůj PIN">
 
 
 
@@ -728,7 +705,10 @@ placeholder="Tvůj PIN">
 </div>
 
 
+
 </div>
+
+
 
 
 
@@ -737,9 +717,9 @@ placeholder="Tvůj PIN">
 <script>
 
 
-let receiverClient=null;
+let sendReceiver=null;
 
-let sendMoneyAmount=0;
+let sendAmount=0;
 
 
 
@@ -755,6 +735,7 @@ let name=
 document.getElementById("receiverName").value;
 
 
+
 let amount=
 Number(document.getElementById("sendAmount").value);
 
@@ -767,10 +748,11 @@ document.getElementById("sendMsg");
 
 
 
+
 if(!name || amount<=0){
 
 
-msg.innerHTML="❌ Vyplň údaje";
+msg.innerHTML="❌ Vyplň jméno a částku";
 
 
 return;
@@ -783,10 +765,11 @@ return;
 
 
 
+
 if(Number(currentClient.money)<amount){
 
 
-msg.innerHTML="❌ Nemáš dostatek peněz";
+msg.innerHTML="❌ Nemáš dost peněz";
 
 
 return;
@@ -809,6 +792,8 @@ const {data,error}=await supabaseClient
 .eq("name",name)
 
 .single();
+
+
 
 
 
@@ -848,17 +833,22 @@ return;
 
 
 
-receiverClient=data;
-
-sendMoneyAmount=amount;
 
 
+sendReceiver=data;
 
-
+sendAmount=amount;
 
 
 
-document.getElementById("sendInfo").innerHTML=
+
+
+
+
+
+document.getElementById("sendInfo")
+
+.innerHTML=
 
 `
 
@@ -876,13 +866,15 @@ document.getElementById("sendInfo").innerHTML=
 
 
 
+
+
+
 document.getElementById("sendConfirm")
+
 .style.display="block";
 
 
-
 }
-
 
 
 
@@ -897,7 +889,13 @@ async function finishSend(){
 
 
 let pin=
+
 document.getElementById("sendPin").value;
+
+
+
+
+
 
 
 
@@ -918,7 +916,26 @@ return;
 
 
 
+
+if(Number(currentClient.money)<sendAmount){
+
+
+stcbAlert("❌ Nemáš dost peněz");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
 let date=
+
 new Date().toLocaleString("cs-CZ");
 
 
@@ -926,13 +943,18 @@ new Date().toLocaleString("cs-CZ");
 
 
 
-currentClient.money =
-Number(currentClient.money)-sendMoneyAmount;
+
+currentClient.money=
+
+Number(currentClient.money)-sendAmount;
 
 
 
-receiverClient.money =
-Number(receiverClient.money)+sendMoneyAmount;
+sendReceiver.money=
+
+Number(sendReceiver.money)+sendAmount;
+
+
 
 
 
@@ -959,17 +981,18 @@ money:currentClient.money
 
 
 
+
 await supabaseClient
 
 .from("clients")
 
 .update({
 
-money:receiverClient.money
+money:sendReceiver.money
 
 })
 
-.eq("id",receiverClient.id);
+.eq("id",sendReceiver.id);
 
 
 
@@ -987,9 +1010,9 @@ await supabaseClient
 
 sender:currentClient.name,
 
-receiver:receiverClient.name,
+receiver:sendReceiver.name,
 
-amount:sendMoneyAmount,
+amount:sendAmount,
 
 date:date
 
@@ -1011,19 +1034,18 @@ updateAccount();
 
 
 document.getElementById("sendConfirm")
-.style.display="none";
 
+.style.display="none";
 
 
 }
 
 
 
-
-
 </script>
 
-<!-- QR STRÁNKA -->
+<!-- QR PLATBA -->
+
 
 <div id="qr" class="page">
 
@@ -1037,7 +1059,7 @@ document.getElementById("sendConfirm")
 
 
 <p>
-Kamera se spustí automaticky.
+Namiř kameru na QR kód
 </p>
 
 
@@ -1048,6 +1070,8 @@ Kamera se spustí automaticky.
 
 
 </div>
+
+
 
 
 
@@ -1066,11 +1090,11 @@ Kamera se spustí automaticky.
 
 <input id="qrPin"
 type="password"
-placeholder="Tvůj PIN">
+placeholder="🔐 Tvůj PIN">
 
 
 
-<button onclick="sendQR()">
+<button onclick="finishQR()">
 
 ✅ Zaplatit
 
@@ -1080,8 +1104,8 @@ placeholder="Tvůj PIN">
 </div>
 
 
-
 </div>
+
 
 
 
@@ -1094,26 +1118,26 @@ placeholder="Tvůj PIN">
 
 let qrScanner=null;
 
-let qrClient=null;
+let qrReceiver=null;
 
 let qrAmount=0;
 
-let qrStarted=false;
+let qrRunning=false;
 
 
 
 
 
 
-// upraví otevření záložky
 
-const oldOpenPage=openPage;
+
+const oldOpenPageQR=openPage;
 
 
 openPage=function(id){
 
 
-oldOpenPage(id);
+oldOpenPageQR(id);
 
 
 
@@ -1134,22 +1158,14 @@ startQR();
 
 
 
+
 async function startQR(){
 
 
-if(qrStarted)return;
+
+if(qrRunning)return;
 
 
-
-if(!navigator.mediaDevices){
-
-
-stcbAlert("❌ Kamera není dostupná");
-
-
-return;
-
-}
 
 
 
@@ -1159,21 +1175,22 @@ try{
 qrScanner=new Html5Qrcode("qrReader");
 
 
-qrStarted=true;
-
-
-
 
 await qrScanner.start(
 
 {
+
 facingMode:"environment"
+
 },
 
 
 {
+
 fps:10,
+
 qrbox:250
+
 },
 
 
@@ -1190,22 +1207,28 @@ readQR(text);
 
 
 
+qrRunning=true;
+
+
+
 }
 
-catch(e){
-
-
-qrStarted=false;
+catch(error){
 
 
 stcbAlert("❌ Kamera nebyla povolena");
 
 
+console.log(error);
+
+
 }
 
 
 
 }
+
+
 
 
 
@@ -1217,14 +1240,20 @@ async function readQR(text){
 
 
 
-let parts=text.split(",");
+// QR formát:
+// 569-Torunn
+
+
+let data=text.split("-");
 
 
 
-if(parts.length!==3){
 
 
-stcbAlert("❌ Neplatný QR kód");
+if(data.length!==2){
+
+
+stcbAlert("❌ Špatný QR kód");
 
 
 return;
@@ -1236,11 +1265,12 @@ return;
 
 
 
-let sender=parts[0];
 
-let amount=Number(parts[1]);
+let amount=Number(data[0]);
 
-let receiver=parts[2];
+let name=data[1];
+
+
 
 
 
@@ -1256,6 +1286,9 @@ return;
 
 
 }
+
+
+
 
 
 
@@ -1277,13 +1310,15 @@ return;
 
 
 
-const {data,error}=await supabaseClient
+
+
+const {data:user,error}=await supabaseClient
 
 .from("clients")
 
 .select("*")
 
-.eq("name",receiver)
+.eq("name",name)
 
 .single();
 
@@ -1291,7 +1326,9 @@ const {data,error}=await supabaseClient
 
 
 
-if(error || !data){
+
+
+if(error || !user){
 
 
 stcbAlert("❌ Příjemce neexistuje");
@@ -1307,82 +1344,12 @@ return;
 
 
 
-qrClient=data;
-
-qrAmount=amount;
 
 
+if(user.id===currentClient.id){
 
 
-
-
-
-document.getElementById("qrInfo").innerHTML=
-
-`
-
-👤 Příjemce:
-<b>${receiver}</b>
-
-<br><br>
-
-💰 Částka:
-<b>${amount.toLocaleString("cs-CZ")} Kč</b>
-
-<br><br>
-
-📤 Odesílatel:
-<b>${sender}</b>
-
-`;
-
-
-
-
-
-document.getElementById("qrConfirm")
-.style.display="block";
-
-
-
-
-
-
-if(qrScanner){
-
-
-await qrScanner.stop();
-
-
-qrStarted=false;
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-async function sendQR(){
-
-
-
-let pin=
-document.getElementById("qrPin").value;
-
-
-
-if(pin!==currentClient.pin){
-
-
-stcbAlert("❌ Špatný PIN");
+stcbAlert("❌ Nemůžeš poslat sám sobě");
 
 
 return;
@@ -1395,21 +1362,11 @@ return;
 
 
 
-let date=
-new Date().toLocaleString("cs-CZ");
 
 
+qrReceiver=user;
 
-
-
-
-currentClient.money=
-Number(currentClient.money)-qrAmount;
-
-
-
-qrClient.money=
-Number(qrClient.money)+qrAmount;
+qrAmount=amount;
 
 
 
@@ -1417,83 +1374,66 @@ Number(qrClient.money)+qrAmount;
 
 
 
-await supabaseClient
+document.getElementById("qrInfo")
 
-.from("clients")
+.innerHTML=
 
-.update({
+`
 
-money:currentClient.money
+👤 Komu:
+<b>${user.name}</b>
 
-})
+<br><br>
 
-.eq("id",currentClient.id);
+💰 Částka:
+<b>${amount.toLocaleString("cs-CZ")} Kč</b>
 
+<br><br>
 
+📤 Odesílá:
+<b>${currentClient.name}</b>
 
-
-
-
-
-await supabaseClient
-
-.from("clients")
-
-.update({
-
-money:qrClient.money
-
-})
-
-.eq("id",qrClient.id);
+`;
 
 
 
 
 
-
-
-await supabaseClient
-
-.from("transfers")
-
-.insert({
-
-sender:currentClient.name,
-
-receiver:qrClient.name,
-
-amount:qrAmount,
-
-date:date
-
-});
-
-
-
-
-
-
-
-stcbAlert("✅ QR platba odeslána");
-
-
-
-updateAccount();
 
 
 
 document.getElementById("qrConfirm")
-.style.display="none";
+
+.style.display="block";
+
+
+
+
+
+
+
+if(qrScanner){
+
+
+await qrScanner.stop();
+
+
+qrRunning=false;
+
+
+}
 
 
 
 }
 
 
+
+
 </script>
 
 <!-- HISTORIE -->
+
 
 <div id="history" class="page">
 
@@ -1502,7 +1442,7 @@ document.getElementById("qrConfirm")
 
 
 <h1>
-📜 Historie pohybů
+📜 Historie plateb
 </h1>
 
 
@@ -1528,19 +1468,223 @@ document.getElementById("qrConfirm")
 <script>
 
 
-async function loadHistory(){
+async function finishQR(){
+
+
+
+let pin=document.getElementById("qrPin").value;
+
+
+
+
+
+if(pin!==currentClient.pin){
+
+
+stcbAlert("❌ Špatný PIN");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+if(Number(currentClient.money)<qrAmount){
+
+
+stcbAlert("❌ Nemáš dost peněz");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+let date=new Date().toLocaleString("cs-CZ");
+
+
+
+
+
+
+currentClient.money=
+
+Number(currentClient.money)-qrAmount;
+
+
+
+qrReceiver.money=
+
+Number(qrReceiver.money)+qrAmount;
+
+
+
+
+
+
+
+currentClient.history=
+
+currentClient.history || [];
+
+
+
+currentClient.history.push({
+
+
+text:
+"📤 QR platba "+qrAmount+" Kč pro "+qrReceiver.name,
+
+
+date:date
+
+
+});
+
+
+
+
+
+
+
+qrReceiver.history=
+
+qrReceiver.history || [];
+
+
+
+qrReceiver.history.push({
+
+
+text:
+"📥 QR platba "+qrAmount+" Kč od "+currentClient.name,
+
+
+date:date
+
+
+});
+
+
+
+
+
+
+
+
+
+await supabaseClient
+
+.from("clients")
+
+.update({
+
+money:currentClient.money,
+
+history:currentClient.history
+
+})
+
+.eq("id",currentClient.id);
+
+
+
+
+
+
+
+
+await supabaseClient
+
+.from("clients")
+
+.update({
+
+money:qrReceiver.money,
+
+history:qrReceiver.history
+
+})
+
+.eq("id",qrReceiver.id);
+
+
+
+
+
+
+
+
+
+await supabaseClient
+
+.from("transfers")
+
+.insert({
+
+sender:currentClient.name,
+
+receiver:qrReceiver.name,
+
+amount:qrAmount,
+
+date:date
+
+});
+
+
+
+
+
+
+
+stcbAlert("✅ QR platba odeslána");
+
+
+
+updateAccount();
+
+
+
+document.getElementById("qrConfirm")
+
+.style.display="none";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function loadHistory(){
 
 
 
 let box=document.getElementById("historyList");
 
 
+
 if(!box || !currentClient)return;
 
 
-
-
-box.innerHTML="";
 
 
 
@@ -1565,6 +1709,15 @@ return;
 
 
 
+
+
+box.innerHTML="";
+
+
+
+
+
+
 history.slice().reverse().forEach(item=>{
 
 
@@ -1572,9 +1725,9 @@ box.innerHTML+=`
 
 <div class="card">
 
-<b>${item.text}</b>
+${item.text}
 
-<br><br>
+<br>
 
 🕒 ${item.date}
 
@@ -1598,12 +1751,35 @@ box.innerHTML+=`
 
 
 
-// automatická aktualizace účtu
+const oldUpdateAccount=updateAccount;
+
+
+updateAccount=function(){
+
+
+oldUpdateAccount();
+
+
+loadHistory();
+
+
+}
+
+
+
+
+
+
+
+
 
 setInterval(async()=>{
 
 
+
 if(!currentClient)return;
+
+
 
 
 
@@ -1620,6 +1796,7 @@ const {data,error}=await supabaseClient
 
 
 
+
 if(!error && data){
 
 
@@ -1627,9 +1804,6 @@ currentClient=data;
 
 
 updateAccount();
-
-
-loadHistory();
 
 
 }
@@ -1643,53 +1817,13 @@ loadHistory();
 
 
 
-
-
-// rozšíření update účtu
-
-const oldUpdateAccount=updateAccount;
-
-
-updateAccount=function(){
-
-
-oldUpdateAccount();
-
-
-
-if(!currentClient)return;
-
-
-
-let p=document.getElementById("profileName");
-
-let a=document.getElementById("profileAccount");
-
-
-
-if(p)
-p.innerHTML=currentClient.name;
-
-
-
-if(a)
-a.innerHTML=
-currentClient.account ||
-"STCB-"+currentClient.id;
-
-
-
-}
-
-
-
-
-
-
-
 </script>
 
-</div> <!-- konec #bank -->
+
+
+
+
+</div>
 
 
 </body>
