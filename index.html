@@ -6,8 +6,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>STCB Bank</title>
+<title>STCB Bank v3</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
@@ -26,157 +27,182 @@ color:white;
 }
 
 
-/* HLAVICKA */
 
-.header{
+#login{
 
-background:#081120;
-
-padding:35px;
-
-text-align:center;
-
-border-bottom:1px solid #20385d;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
 
 }
+
+
+
+.box{
+
+width:380px;
+max-width:90%;
+background:#101c32;
+padding:35px;
+border-radius:25px;
+border:1px solid #20385d;
+box-shadow:0 20px 60px #000;
+
+}
+
 
 
 .logo{
 
-font-size:55px;
-
-font-weight:bold;
-
-color:#00c8ff;
-
-}
-
-
-.subtitle{
-
-font-size:22px;
-
-color:#b4c7e7;
-
-}
-
-
-
-
-/* UVOD */
-
-.hero{
-
-padding:80px 20px;
-
+font-size:70px;
 text-align:center;
 
 }
 
 
-.hero h1{
 
-font-size:60px;
+h1{
 
+color:#00c8ff;
+
+}
+
+
+
+input{
+
+width:100%;
+padding:14px;
+margin-top:12px;
+background:#050b16;
+color:white;
+border:1px solid #29405f;
+border-radius:15px;
+
+}
+
+
+
+button{
+
+width:100%;
+padding:14px;
+margin-top:12px;
+background:linear-gradient(135deg,#006cff,#00c8ff);
+color:white;
+border:0;
+border-radius:15px;
+font-weight:bold;
+cursor:pointer;
+
+}
+
+
+
+#bank{
+
+display:none;
+
+}
+
+
+
+.header{
+
+height:70px;
+display:flex;
+align-items:center;
+padding:20px;
+background:#081120;
+border-bottom:1px solid #20385d;
+font-size:25px;
 color:#00c8ff;
 
 }
 
 
-.hero p{
 
-font-size:24px;
+.nav{
 
-color:#b4c7e7;
-
-}
-
-
-
-
-
-section{
-
-max-width:1100px;
-
-margin:auto;
-
-padding:40px 20px;
+display:flex;
+gap:10px;
+padding:10px;
+background:#081120;
+overflow:auto;
 
 }
 
 
 
-.title{
+.nav button{
 
-color:#00c8ff;
-
-font-size:35px;
+min-width:110px;
+margin:0;
 
 }
 
 
+
+.page{
+
+display:none;
+padding:20px;
+
+}
+
+
+
+.page.active{
+
+display:block;
+
+}
 
 
 
 .card{
 
 background:#101c32;
-
 border:1px solid #20385d;
-
-border-radius:25px;
-
-padding:30px;
-
-margin:20px 0;
-
-box-shadow:0 10px 40px #0005;
-
-}
-
-
-.card h2{
-
-color:#00c8ff;
+border-radius:22px;
+padding:25px;
+margin-bottom:20px;
 
 }
 
 
 
+.money{
 
-
-.news{
-
-display:flex;
-
-gap:20px;
-
-flex-wrap:wrap;
-
-}
-
-
-.news .card{
-
-flex:1;
-
-min-width:250px;
+font-size:42px;
+color:#00ff88;
 
 }
 
 
 
+/* STCB vlastní upozornění */
 
-footer{
+#alerts{
 
-text-align:center;
+position:fixed;
+top:20px;
+right:20px;
+z-index:9999;
 
-padding:35px;
+}
 
-color:#9db2d4;
 
-border-top:1px solid #20385d;
+
+.alert{
+
+background:#101c32;
+border:1px solid #00c8ff;
+padding:18px;
+border-radius:18px;
+margin-bottom:10px;
+box-shadow:0 10px 40px #000;
 
 }
 
@@ -184,156 +210,63 @@ border-top:1px solid #20385d;
 
 </style>
 
+
 </head>
+
 
 
 <body>
 
 
 
-<div class="header">
+<div id="alerts"></div>
+
+
+
+
+<div id="login">
+
+
+<div class="box">
+
 
 <div class="logo">
-🏦 STCB Bank
-</div>
 
-
-<div class="subtitle">
-SirTros-City Central Bank
-</div>
-
+🏦
 
 </div>
-
-
-
-
-
-<div class="hero">
 
 
 <h1>
-Oficiální banka SirTros-City
+
+STCB Bank
+
 </h1>
 
 
 <p>
-Moderní finanční systém virtuálního města.
-</p>
 
-
-</div>
-
-
-
-
-
-<section>
-
-
-<h2 class="title">
-🏛️ O STCB Bank
-</h2>
-
-
-<div class="card">
-
-<p>
-STCB Bank je centrální banka
-SirTros-City.
+Přihlášení klienta
 
 </p>
 
-<p>
-Spravuje městský finanční systém
-a podporuje ekonomiku města.
-</p>
+
+<input id="name" placeholder="👤 Jméno">
 
 
-</div>
+<input id="pin" type="password" placeholder="🔐 PIN">
 
 
-</section>
+<button onclick="login()">
+
+Přihlásit
+
+</button>
 
 
+<p id="loginMsg"></p>
 
 
-
-
-
-<section>
-
-
-<h2 class="title">
-💰 Měna STC
-</h2>
-
-
-<div class="card">
-
-
-<h2>
-🪙 STC
-</h2>
-
-
-<p>
-STC je oficiální virtuální měna
-SirTros-City.
-</p>
-
-
-<p>
-Používá se pro platby a ekonomiku města.
-</p>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-<section>
-
-
-<h2 class="title">
-📰 Aktuality
-</h2>
-
-
-
-<div class="news">
-
-
-<div class="card">
-
-<h2>
-🟢 Banka online
-</h2>
-
-<p>
-STCB Bank je připravena poskytovat služby.
-</p>
-
-</div>
-
-
-
-<div class="card">
-
-<h2>
-🏙️ SirTros-City
-</h2>
-
-<p>
-Banka je součástí městského systému.
-</p>
 
 </div>
 
@@ -341,121 +274,203 @@ Banka je součástí městského systému.
 </div>
 
 
-</section>
+
+
+
+<div id="bank">
+
+
+<div class="header">
+
+🏦 STCB Bank
+
+</div>
+
+
+
+<div class="nav">
+
+
+<button onclick="openPage('home')">
+🏠 Domů
+</button>
+
+
+<button onclick="openPage('send')">
+💸 Poslat
+</button>
+
+
+<button onclick="openPage('qr')">
+📷 QR
+</button>
+
+
+<button onclick="openPage('history')">
+📜 Historie
+</button>
+
+
+<button onclick="openPage('profile')">
+👤 Profil
+</button>
+
+
+</div>
 
 
 
 
-
-
-
-<section>
-
-
-<h2 class="title">
-📖 Návod: Kontakt STCB Bank
-</h2>
-
+<div id="home" class="page active">
 
 
 <div class="card">
 
 
-<h2>
-1️⃣ Minecraft kontakt
+<h1>
+
+Vítej 👋
+
+</h1>
+
+
+<h2 id="userName">
+
+-
+
 </h2>
-
-
-<p>
-Pokud je SirTros online na Minecraft serveru,
-napiš mu zprávu do chatu.
-</p>
-
-
-
-<div class="card">
-
-
-💬 Zpráva:
-
-
-<br><br>
-
-
-"Ahoj SirTrosi, potřebuji pomoc se STCB Bank.
-Můžeš mi prosím odpovědět?"
-
-
-</div>
 
 
 
 <h2>
-2️⃣ Počkej na odpověď
+
+💰 Zůstatek
+
 </h2>
 
 
-<p>
-SirTros nebo správa banky ti odpoví.
-</p>
+<div id="balance" class="money">
+
+0 Kč
+
+</div>
+
 
 
 </div>
 
 
-</section>
+</div>
+
+
+
+<!-- pokračování 2/5 -->
+
+
+
+<script>
+
+
+const supabaseClient = supabase.createClient(
+
+"https://knpkaoddloxtzdtzwjle.supabase.co",
+
+"sb_publishable_9hCQV5TfwR0VvoCPUJLiJQ_6ukPmXNr"
+
+);
+
+
+
+let currentClient=null;
 
 
 
 
+function stcbAlert(text){
+
+
+let a=document.createElement("div");
+
+a.className="alert";
+
+a.innerHTML=text;
+
+
+document.getElementById("alerts")
+.appendChild(a);
 
 
 
-<section>
+setTimeout(()=>{
+
+a.remove();
+
+},3000);
 
 
-<h2 class="title">
-📄 Dokumenty
-</h2>
+}
+
+
+
+
+function openPage(id){
+
+
+document.querySelectorAll(".page")
+.forEach(x=>x.classList.remove("active"));
+
+
+
+document.getElementById(id)
+.classList.add("active");
+
+
+}
+
+
+
+</script>
+
+<!-- PROFIL -->
+
+<div id="profile" class="page">
 
 
 <div class="card">
 
 
-<p>
-• Pravidla STCB Bank
-</p>
+<h1>
+👤 Profil
+</h1>
 
 
 <p>
-• Ekonomický systém STC
+Jméno:
+<b id="profileName">-</b>
 </p>
+
 
 
 <p>
-• Informace pro obyvatele SirTros-City
+Číslo účtu:
+<b id="profileAccount">-</b>
 </p>
+
+
+
+<button onclick="logout()">
+
+🚪 Odhlásit
+
+</button>
 
 
 </div>
 
 
-</section>
+</div>
 
 
-
-
-
-
-<footer>
-
-© 2026 STCB Bank
-
-<br>
-
-SirTros-City Central Bank
-
-</footer>
 
 
 
@@ -464,11 +479,1217 @@ SirTros-City Central Bank
 <script>
 
 
-console.log("STCB Bank veřejný web spuštěn");
+async function login(){
+
+
+
+let name =
+document.getElementById("name").value;
+
+
+
+let pin =
+document.getElementById("pin").value;
+
+
+
+let msg =
+document.getElementById("loginMsg");
+
+
+
+
+
+if(!name || !pin){
+
+
+msg.innerHTML="❌ Vyplň jméno a PIN";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+const {data,error}=await supabaseClient
+
+.from("clients")
+
+.select("*")
+
+.eq("name",name)
+
+.eq("pin",pin)
+
+.single();
+
+
+
+
+
+
+
+
+if(error || !data){
+
+
+
+msg.innerHTML="❌ Špatné jméno nebo PIN";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+currentClient=data;
+
+
+
+
+
+document.getElementById("login")
+.style.display="none";
+
+
+
+document.getElementById("bank")
+.style.display="block";
+
+
+
+
+
+updateAccount();
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function updateAccount(){
+
+
+if(!currentClient)return;
+
+
+
+
+document.getElementById("userName")
+.innerHTML=currentClient.name;
+
+
+
+document.getElementById("balance")
+.innerHTML=
+
+Number(currentClient.money)
+.toLocaleString("cs-CZ")+" Kč";
+
+
+
+document.getElementById("profileName")
+.innerHTML=currentClient.name;
+
+
+
+document.getElementById("profileAccount")
+.innerHTML=
+
+currentClient.account ||
+
+"STCB-"+currentClient.id;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+function logout(){
+
+
+currentClient=null;
+
+
+
+document.getElementById("bank")
+.style.display="none";
+
+
+
+document.getElementById("login")
+.style.display="flex";
+
+
+
+document.getElementById("name").value="";
+
+document.getElementById("pin").value="";
+
+
+
+}
+
+
 
 
 </script>
 
+<!-- POSÍLÁNÍ -->
+
+<div id="send" class="page">
+
+
+<div class="card">
+
+
+<h1>
+💸 Poslat peníze
+</h1>
+
+
+<input id="receiverName"
+placeholder="👤 Jméno příjemce">
+
+
+<input id="sendAmount"
+type="number"
+placeholder="💰 Částka Kč">
+
+
+
+<button onclick="prepareSend()">
+
+🔎 Pokračovat
+
+</button>
+
+
+<p id="sendMsg"></p>
+
+
+</div>
+
+
+
+
+
+<div id="sendConfirm" class="card" style="display:none;">
+
+
+<h2>
+🔐 Potvrzení platby
+</h2>
+
+
+<p id="sendInfo"></p>
+
+
+
+<input id="sendPin"
+type="password"
+placeholder="Tvůj PIN">
+
+
+
+<button onclick="finishSend()">
+
+✅ Odeslat
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<script>
+
+
+let receiverClient=null;
+
+let sendMoneyAmount=0;
+
+
+
+
+
+
+
+async function prepareSend(){
+
+
+
+let name=
+document.getElementById("receiverName").value;
+
+
+let amount=
+Number(document.getElementById("sendAmount").value);
+
+
+
+let msg=
+document.getElementById("sendMsg");
+
+
+
+
+
+if(!name || amount<=0){
+
+
+msg.innerHTML="❌ Vyplň údaje";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+if(Number(currentClient.money)<amount){
+
+
+msg.innerHTML="❌ Nemáš dostatek peněz";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+const {data,error}=await supabaseClient
+
+.from("clients")
+
+.select("*")
+
+.eq("name",name)
+
+.single();
+
+
+
+
+
+
+if(error || !data){
+
+
+msg.innerHTML="❌ Uživatel neexistuje";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+if(data.id===currentClient.id){
+
+
+msg.innerHTML="❌ Nemůžeš poslat sám sobě";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+receiverClient=data;
+
+sendMoneyAmount=amount;
+
+
+
+
+
+
+
+document.getElementById("sendInfo").innerHTML=
+
+`
+
+👤 Komu:
+<b>${data.name}</b>
+
+<br><br>
+
+💰 Částka:
+<b>${amount.toLocaleString("cs-CZ")} Kč</b>
+
+`;
+
+
+
+
+
+document.getElementById("sendConfirm")
+.style.display="block";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+async function finishSend(){
+
+
+
+let pin=
+document.getElementById("sendPin").value;
+
+
+
+if(pin!==currentClient.pin){
+
+
+stcbAlert("❌ Špatný PIN");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+let date=
+new Date().toLocaleString("cs-CZ");
+
+
+
+
+
+
+currentClient.money =
+Number(currentClient.money)-sendMoneyAmount;
+
+
+
+receiverClient.money =
+Number(receiverClient.money)+sendMoneyAmount;
+
+
+
+
+
+
+
+await supabaseClient
+
+.from("clients")
+
+.update({
+
+money:currentClient.money
+
+})
+
+.eq("id",currentClient.id);
+
+
+
+
+
+
+
+
+await supabaseClient
+
+.from("clients")
+
+.update({
+
+money:receiverClient.money
+
+})
+
+.eq("id",receiverClient.id);
+
+
+
+
+
+
+
+
+
+await supabaseClient
+
+.from("transfers")
+
+.insert({
+
+sender:currentClient.name,
+
+receiver:receiverClient.name,
+
+amount:sendMoneyAmount,
+
+date:date
+
+});
+
+
+
+
+
+
+
+
+stcbAlert("✅ Platba odeslána");
+
+
+
+updateAccount();
+
+
+
+document.getElementById("sendConfirm")
+.style.display="none";
+
+
+
+}
+
+
+
+
+
+</script>
+
+<!-- QR STRÁNKA -->
+
+<div id="qr" class="page">
+
+
+<div class="card">
+
+
+<h1>
+📷 QR Platba
+</h1>
+
+
+<p>
+Kamera se spustí automaticky.
+</p>
+
+
+<div id="qrReader"></div>
+
+
+<p id="qrMsg"></p>
+
+
+</div>
+
+
+
+
+
+<div id="qrConfirm" class="card" style="display:none;">
+
+
+<h2>
+🔐 Potvrzení QR platby
+</h2>
+
+
+<p id="qrInfo"></p>
+
+
+<input id="qrPin"
+type="password"
+placeholder="Tvůj PIN">
+
+
+
+<button onclick="sendQR()">
+
+✅ Zaplatit
+
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+let qrScanner=null;
+
+let qrClient=null;
+
+let qrAmount=0;
+
+let qrStarted=false;
+
+
+
+
+
+
+// upraví otevření záložky
+
+const oldOpenPage=openPage;
+
+
+openPage=function(id){
+
+
+oldOpenPage(id);
+
+
+
+if(id==="qr"){
+
+
+startQR();
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+async function startQR(){
+
+
+if(qrStarted)return;
+
+
+
+if(!navigator.mediaDevices){
+
+
+stcbAlert("❌ Kamera není dostupná");
+
+
+return;
+
+}
+
+
+
+try{
+
+
+qrScanner=new Html5Qrcode("qrReader");
+
+
+qrStarted=true;
+
+
+
+
+await qrScanner.start(
+
+{
+facingMode:"environment"
+},
+
+
+{
+fps:10,
+qrbox:250
+},
+
+
+(text)=>{
+
+
+readQR(text);
+
+
+}
+
+
+);
+
+
+
+}
+
+catch(e){
+
+
+qrStarted=false;
+
+
+stcbAlert("❌ Kamera nebyla povolena");
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+async function readQR(text){
+
+
+
+let parts=text.split(",");
+
+
+
+if(parts.length!==3){
+
+
+stcbAlert("❌ Neplatný QR kód");
+
+
+return;
+
+
+}
+
+
+
+
+
+let sender=parts[0];
+
+let amount=Number(parts[1]);
+
+let receiver=parts[2];
+
+
+
+
+
+if(amount<=0){
+
+
+stcbAlert("❌ Špatná částka");
+
+
+return;
+
+
+}
+
+
+
+
+
+if(Number(currentClient.money)<amount){
+
+
+stcbAlert("❌ Nemáš dost peněz");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+const {data,error}=await supabaseClient
+
+.from("clients")
+
+.select("*")
+
+.eq("name",receiver)
+
+.single();
+
+
+
+
+
+if(error || !data){
+
+
+stcbAlert("❌ Příjemce neexistuje");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+qrClient=data;
+
+qrAmount=amount;
+
+
+
+
+
+
+
+document.getElementById("qrInfo").innerHTML=
+
+`
+
+👤 Příjemce:
+<b>${receiver}</b>
+
+<br><br>
+
+💰 Částka:
+<b>${amount.toLocaleString("cs-CZ")} Kč</b>
+
+<br><br>
+
+📤 Odesílatel:
+<b>${sender}</b>
+
+`;
+
+
+
+
+
+document.getElementById("qrConfirm")
+.style.display="block";
+
+
+
+
+
+
+if(qrScanner){
+
+
+await qrScanner.stop();
+
+
+qrStarted=false;
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+async function sendQR(){
+
+
+
+let pin=
+document.getElementById("qrPin").value;
+
+
+
+if(pin!==currentClient.pin){
+
+
+stcbAlert("❌ Špatný PIN");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+let date=
+new Date().toLocaleString("cs-CZ");
+
+
+
+
+
+
+currentClient.money=
+Number(currentClient.money)-qrAmount;
+
+
+
+qrClient.money=
+Number(qrClient.money)+qrAmount;
+
+
+
+
+
+
+
+await supabaseClient
+
+.from("clients")
+
+.update({
+
+money:currentClient.money
+
+})
+
+.eq("id",currentClient.id);
+
+
+
+
+
+
+
+await supabaseClient
+
+.from("clients")
+
+.update({
+
+money:qrClient.money
+
+})
+
+.eq("id",qrClient.id);
+
+
+
+
+
+
+
+await supabaseClient
+
+.from("transfers")
+
+.insert({
+
+sender:currentClient.name,
+
+receiver:qrClient.name,
+
+amount:qrAmount,
+
+date:date
+
+});
+
+
+
+
+
+
+
+stcbAlert("✅ QR platba odeslána");
+
+
+
+updateAccount();
+
+
+
+document.getElementById("qrConfirm")
+.style.display="none";
+
+
+
+}
+
+
+</script>
+
+<!-- HISTORIE -->
+
+<div id="history" class="page">
+
+
+<div class="card">
+
+
+<h1>
+📜 Historie pohybů
+</h1>
+
+
+<div id="historyList">
+
+Žádné pohyby
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<script>
+
+
+async function loadHistory(){
+
+
+
+let box=document.getElementById("historyList");
+
+
+if(!box || !currentClient)return;
+
+
+
+
+box.innerHTML="";
+
+
+
+let history=currentClient.history || [];
+
+
+
+
+
+if(history.length===0){
+
+
+box.innerHTML="Žádné pohyby";
+
+
+return;
+
+
+}
+
+
+
+
+
+history.slice().reverse().forEach(item=>{
+
+
+box.innerHTML+=`
+
+<div class="card">
+
+<b>${item.text}</b>
+
+<br><br>
+
+🕒 ${item.date}
+
+</div>
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// automatická aktualizace účtu
+
+setInterval(async()=>{
+
+
+if(!currentClient)return;
+
+
+
+const {data,error}=await supabaseClient
+
+.from("clients")
+
+.select("*")
+
+.eq("id",currentClient.id)
+
+.single();
+
+
+
+
+if(!error && data){
+
+
+currentClient=data;
+
+
+updateAccount();
+
+
+loadHistory();
+
+
+}
+
+
+
+},5000);
+
+
+
+
+
+
+
+
+// rozšíření update účtu
+
+const oldUpdateAccount=updateAccount;
+
+
+updateAccount=function(){
+
+
+oldUpdateAccount();
+
+
+
+if(!currentClient)return;
+
+
+
+let p=document.getElementById("profileName");
+
+let a=document.getElementById("profileAccount");
+
+
+
+if(p)
+p.innerHTML=currentClient.name;
+
+
+
+if(a)
+a.innerHTML=
+currentClient.account ||
+"STCB-"+currentClient.id;
+
+
+
+}
+
+
+
+
+
+
+
+</script>
+
+</div> <!-- konec #bank -->
 
 
 </body>
