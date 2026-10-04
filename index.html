@@ -10,6 +10,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 
 <style>
 
@@ -134,31 +135,6 @@ border-radius:14px;
 background:#081120;
 border:1px solid #20385d;
 text-align:center;
-line-height:1.5;
-}
-
-.secretBox{
-margin-top:15px;
-padding:16px;
-border-radius:18px;
-background:#081120;
-border:1px solid #00c8ff;
-text-align:center;
-}
-
-.secretLabel{
-color:#9fb3d1;
-font-size:13px;
-margin-bottom:8px;
-}
-
-.secret{
-font-family:Consolas,monospace;
-font-size:16px;
-font-weight:bold;
-word-break:break-all;
-color:#00ff88;
-letter-spacing:1px;
 }
 
 #bank{
@@ -239,18 +215,13 @@ overflow:hidden;
 border-radius:20px;
 }
 
-.smallInfo{
-font-size:13px;
-color:#9fb3d1;
-line-height:1.5;
-margin-top:12px;
-}
-
 </style>
 
 </head>
 
+
 <body>
+
 
 <div id="alerts"></div>
 
@@ -317,36 +288,25 @@ Authenticator
 </h1>
 
 <p id="authText" class="securityText">
+Zadej 6místný kód z Authenticatoru.
 </p>
 
 <div class="step">
 
 <div class="stepDot done"></div>
-<div id="authStep2" class="stepDot active"></div>
+<div class="stepDot active"></div>
 
 </div>
 
+<div
+id="authQr"
+style="display:none;text-align:center;margin-top:15px;"
+></div>
 
-<!--
-     QR JE ZÁMĚRNĚ PRÁZDNÝ.
-     PRO NASTAVENÍ SE POUŽÍVÁ POUZE TAJNÝ KLÍČ.
--->
-
-<div id="authSecret" class="secretBox hidden">
-
-<div class="secretLabel">
-🔑 Tajný klíč pro Authenticator
-</div>
-
-<div id="authSecretValue" class="secret">
-</div>
-
-<div class="smallInfo">
-Zadej tento klíč ručně do své aplikace Authenticator.
-</div>
-
-</div>
-
+<div
+id="authSecret"
+style="display:none;word-break:break-all;text-align:center;color:#9fb3d1;font-size:13px;margin-top:12px;"
+></div>
 
 <input
 id="authCode"
@@ -362,6 +322,7 @@ autocomplete="one-time-code"
 </button>
 
 <div id="authStatus" class="status">
+Authenticator je vyžadován pro tento účet.
 </div>
 
 <button
@@ -412,9 +373,7 @@ style="background:#17243a;"
 </div>
 
 
-<!-- ========================= -->
 <!-- DOMŮ -->
-<!-- ========================= -->
 
 <div id="home" class="page active">
 
@@ -441,9 +400,7 @@ Vítej 👋
 </div>
 
 
-<!-- ========================= -->
 <!-- PROFIL -->
-<!-- ========================= -->
 
 <div id="profile" class="page">
 
@@ -473,11 +430,6 @@ Authenticator:
 <b id="profileAuth">-</b>
 </p>
 
-<p>
-Stav nastavení:
-<b id="profileAuthStatus">-</b>
-</p>
-
 <button onclick="logout()">
 🚪 Odhlásit
 </button>
@@ -487,9 +439,7 @@ Stav nastavení:
 </div>
 
 
-<!-- ========================= -->
 <!-- POSÍLÁNÍ -->
-<!-- ========================= -->
 
 <div id="send" class="page">
 
@@ -546,9 +496,7 @@ placeholder="🔐 Tvůj PIN"
 </div>
 
 
-<!-- ========================= -->
 <!-- QR -->
-<!-- ========================= -->
 
 <div id="qr" class="page">
 
@@ -596,9 +544,7 @@ placeholder="🔐 Tvůj PIN"
 </div>
 
 
-<!-- ========================= -->
 <!-- HISTORIE -->
-<!-- ========================= -->
 
 <div id="history" class="page">
 
@@ -646,13 +592,11 @@ detectSessionInUrl:true
 /* STAV */
 /* ========================================= */
 
-let currentClient = null;
-let pendingClient = null;
-
-let authenticatorVerified = false;
-
-let totpFactorId = null;
-let totpSecret = null;
+let currentClient=null;
+let pendingClient=null;
+let authenticatorVerified=false;
+let totpSecret=null;
+let totpFactorId=null;
 
 
 /* ========================================= */
@@ -809,7 +753,7 @@ pendingClient=data;
 /* SUPABASE AUTH */
 /* ========================================= */
 
-let authResult=
+const authResult=
 await supabaseClient.auth.signInWithPassword({
 
 email:data.email,
@@ -853,7 +797,7 @@ return;
 if(!signup.data.session){
 
 msg.innerHTML=
-"❌ Supabase vyžaduje potvrzení e-mailu.";
+"❌ Supabase vyžaduje potvrzení e-mailu. Vypni v Supabase Auth nastavení Confirm email.";
 
 return;
 
@@ -863,7 +807,7 @@ return;
 
 
 msg.innerHTML=
-"⏳ Přihlašování…";
+"⏳ Přihlášení úspěšné…";
 
 
 await afterLogin();
@@ -879,29 +823,6 @@ async function afterLogin(){
 
 try{
 
-/*
-   AUTH JE JEDINÁ HODNOTA,
-   KTERÁ ROZHODUJE, JESTLI JE
-   AUTHENTICATOR POVINNÝ.
-*/
-
-if(String(pendingClient.auth)!=="1"){
-
-finishLogin();
-
-return;
-
-}
-
-
-/*
-   AUTH = 1
-   Authenticator je zapnutý.
-
-   Teď zjistíme, jestli už existuje
-   ověřený nebo neověřený TOTP faktor.
-*/
-
 const factors=
 await supabaseClient.auth.mfa.listFactors();
 
@@ -913,84 +834,55 @@ throw factors.error;
 }
 
 
-const totpFactors=
-factors.data.totp || [];
-
-
-/* ========================================= */
-/* OVĚŘENÝ FAKTOR */
-/* ========================================= */
-
-const verifiedFactor=
-totpFactors.find(
+const verifiedFactors=
+(factors.data.totp || [])
+.filter(
 factor=>factor.status==="verified"
 );
 
 
-if(verifiedFactor){
+if(verifiedFactors.length>0){
 
-totpFactorId=verifiedFactor.id;
+totpFactorId=
+verifiedFactors[0].id;
 
-showAuthenticatorVerification();
+document
+.getElementById("login")
+.classList.add("hidden");
 
-return;
+document
+.getElementById("authenticator")
+.classList.remove("hidden");
 
-}
-
-
-/* ========================================= */
-/* NASTAVOVANÝ FAKTOR */
-/* ========================================= */
-
-const unverifiedFactor=
-totpFactors.find(
-factor=>factor.status==="unverified"
-);
+document
+.getElementById("authText")
+.innerHTML=
+"Zadej 6místný kód z Authenticatoru.";
 
 
-if(unverifiedFactor){
+document
+.getElementById("authQr")
+.style.display="none";
 
-totpFactorId=unverifiedFactor.id;
 
-/*
-   Secret z původního enroll()
-   už Supabase znovu neposílá.
+document
+.getElementById("authSecret")
+.style.display="none";
 
-   Pokud ho máme uložený lokálně,
-   zobrazíme ho.
-*/
 
-const savedSecret=
-localStorage.getItem(
-"sirtros_totp_secret_"+unverifiedFactor.id
-);
-
-if(savedSecret){
-
-totpSecret=savedSecret;
-
-showAuthenticatorSetup();
-
-}
-else{
-
-showAuthenticatorSetupWithoutSecret();
-
-}
+document
+.getElementById("authStatus")
+.innerHTML=
+"Authenticator je vyžadován pro tento účet.";
 
 return;
 
 }
 
-
-/* ========================================= */
-/* ŽÁDNÝ FAKTOR */
-/* ========================================= */
 
 await setupAuthenticator();
 
 }
-
 catch(error){
 
 console.error(error);
@@ -1008,112 +900,7 @@ document
 
 
 /* ========================================= */
-/* ZOBRAZENÍ OVĚŘENÍ */
-/* ========================================= */
-
-function showAuthenticatorVerification(){
-
-document
-.getElementById("login")
-.classList.add("hidden");
-
-document
-.getElementById("authenticator")
-.classList.remove("hidden");
-
-document
-.getElementById("authText")
-.innerHTML=
-"Authenticator je zapnutý. Zadej aktuální 6místný kód.";
-
-document
-.getElementById("authStatus")
-.innerHTML=
-"🔐 Tento účet vyžaduje ověření Authenticatorem.";
-
-document
-.getElementById("authSecret")
-.classList.add("hidden");
-
-document
-.getElementById("authCode")
-.value="";
-
-}
-
-
-/* ========================================= */
-/* ZOBRAZENÍ NASTAVENÍ */
-/* ========================================= */
-
-function showAuthenticatorSetup(){
-
-document
-.getElementById("login")
-.classList.add("hidden");
-
-document
-.getElementById("authenticator")
-.classList.remove("hidden");
-
-document
-.getElementById("authText")
-.innerHTML=
-"Authenticator je zapnutý, ale ještě není dokončené jeho nastavení.";
-
-document
-.getElementById("authSecret")
-.classList.remove("hidden");
-
-document
-.getElementById("authSecretValue")
-textContent=totpSecret;
-
-document
-.getElementById("authStatus")
-.innerHTML=
-"📱 Zadej tajný klíč do aplikace Authenticator a potom zadej aktuální 6místný kód.";
-
-document
-.getElementById("authCode")
-.value="";
-
-}
-
-
-/* ========================================= */
-/* NASTAVENÍ BEZ ZNÁMÉHO KLÍČE */
-/* ========================================= */
-
-function showAuthenticatorSetupWithoutSecret(){
-
-document
-.getElementById("login")
-.classList.add("hidden");
-
-document
-.getElementById("authenticator")
-.classList.remove("hidden");
-
-document
-.getElementById("authText")
-.innerHTML=
-"Authenticator je zapnutý, ale nastavení nebylo dokončeno.";
-
-document
-.getElementById("authSecret")
-.classList.add("hidden");
-
-document
-.getElementById("authStatus")
-.innerHTML=
-"⚠️ Tento Authenticator už byl vytvořen, ale jeho tajný klíč není možné znovu načíst. Je potřeba dokončit původní nastavení nebo faktor vytvořit znovu.";
-
-}
-
-
-/* ========================================= */
-/* VYTVOŘENÍ NOVÉHO AUTHENTICATORU */
+/* NASTAVENÍ AUTHENTICATORU */
 /* ========================================= */
 
 async function setupAuthenticator(){
@@ -1126,136 +913,32 @@ document
 .getElementById("authenticator")
 .classList.remove("hidden");
 
+
 document
 .getElementById("authText")
 .innerHTML=
-"První nastavení Authenticatoru.";
+"První přihlášení: naskenuj QR kód v Authenticatoru.";
 
-document
-.getElementById("authSecret")
-.classList.add("hidden");
 
 document
 .getElementById("authStatus")
 .innerHTML=
-"⏳ Vytvářím tajný klíč…";
+"⏳ Vytvářím QR kód…";
 
 
 try{
-
-/*
-   DŮLEŽITÉ:
-   Nejprve znovu ověříme, že faktor opravdu neexistuje.
-*/
-
-const factors=
-await supabaseClient.auth.mfa.listFactors();
-
-if(factors.error){
-
-throw factors.error;
-
-}
-
-const existing=
-(factors.data.totp || []);
-
-
-/* Kdyby mezitím vznikl ověřený faktor */
-
-const verified=
-existing.find(
-factor=>factor.status==="verified"
-);
-
-if(verified){
-
-totpFactorId=verified.id;
-
-showAuthenticatorVerification();
-
-return;
-
-}
-
-
-/* Kdyby existoval neověřený faktor */
-
-const unverified=
-existing.find(
-factor=>factor.status==="unverified"
-);
-
-if(unverified){
-
-totpFactorId=unverified.id;
-
-const saved=
-localStorage.getItem(
-"sirtros_totp_secret_"+unverified.id
-);
-
-if(saved){
-
-totpSecret=saved;
-
-showAuthenticatorSetup();
-
-}
-else{
-
-showAuthenticatorSetupWithoutSecret();
-
-}
-
-return;
-
-}
-
-
-/*
-   Opravdu neexistuje žádný faktor.
-   Teprve nyní zkusíme vytvořit nový.
-*/
 
 const result=
 await supabaseClient.auth.mfa.enroll({
 
 factorType:"totp",
 
-friendlyName:
-"SirTros-city Bank Authenticator"
+friendlyName:"SirTros-city Bank Authenticator"
 
 });
 
 
 if(result.error){
-
-/*
-   Toto je důležité.
-   Pokud Supabase vrátí AAL2,
-   JS to nesmí obcházet.
-*/
-
-if(
-result.error.message &&
-result.error.message
-.toLowerCase()
-.includes("aal2")
-){
-
-document
-.getElementById("authStatus")
-.innerHTML=
-"❌ Supabase nepovoluje vytvoření nového Authenticatoru z tohoto přihlášení.<br><br>"
-+
-"<b>AAL2 required to enroll a new factor</b><br><br>"
-+
-"V Supabase je zapnuté pravidlo, které vyžaduje AAL2 před vytvořením nového faktoru.";
-
-return;
-
-}
 
 throw result.error;
 
@@ -1269,26 +952,34 @@ totpSecret=
 result.data.totp.secret;
 
 
-/*
-   Secret uložíme lokálně,
-   protože ho Supabase později z listFactors()
-   neposílá zpět.
-*/
+const qrBox=
+document.getElementById("authQr");
 
-localStorage.setItem(
-"sirtros_totp_secret_"+totpFactorId,
+qrBox.style.display="block";
+
+qrBox.innerHTML=
+result.data.totp.qr_code;
+
+
+const secretBox=
+document.getElementById("authSecret");
+
+secretBox.style.display="block";
+
+secretBox.innerHTML=
+"🔑 Tajný klíč:<br><b>"
++
 totpSecret
-);
++
+"</b>";
 
 
-/*
-   QR ZÁMĚRNĚ NEPOUŽÍVÁME.
-*/
-
-showAuthenticatorSetup();
+document
+.getElementById("authStatus")
+.innerHTML=
+"📱 Naskenuj QR v Authenticatoru a potom zadej aktuální 6místný kód.";
 
 }
-
 catch(error){
 
 console.error(error);
@@ -1380,14 +1071,8 @@ throw verification.error;
 }
 
 
-/*
-   ÚSPĚŠNĚ OVĚŘENO.
-   
-   Teď nastavíme oba údaje:
-   
-   auth = 1
-   auth-status = 1
-*/
+authenticatorVerified=true;
+
 
 const update=
 await supabaseClient
@@ -1409,27 +1094,12 @@ throw update.error;
 }
 
 
-authenticatorVerified=true;
-
 pendingClient.auth="1";
 pendingClient["auth-status"]="1";
 
 
-/*
-   Secret už není potřeba držet.
-*/
-
-if(totpFactorId){
-
-localStorage.removeItem(
-"sirtros_totp_secret_"+totpFactorId
-);
-
-}
-
-
 status.innerHTML=
-"✅ Authenticator byl úspěšně nastaven.";
+"✅ Authenticator ověřen.";
 
 
 setTimeout(()=>{
@@ -1438,8 +1108,8 @@ finishLogin();
 
 },500);
 
-}
 
+}
 catch(error){
 
 console.error(error);
@@ -1465,36 +1135,10 @@ return;
 }
 
 
-/*
-   Auth = 0
-   → Authenticator není potřeba.
-*/
-
-if(String(pendingClient.auth)!=="1"){
-
-currentClient=pendingClient;
-
-pendingClient=null;
-
-authenticatorVerified=false;
-
-totpFactorId=null;
-
-totpSecret=null;
-
-showBank();
-
-return;
-
-}
-
-
-/*
-   Auth = 1
-   → musí být ověřený Authenticator.
-*/
-
-if(!authenticatorVerified){
+if(
+String(pendingClient.auth)==="1" &&
+!authenticatorVerified
+){
 
 return;
 
@@ -1511,28 +1155,21 @@ totpFactorId=null;
 
 totpSecret=null;
 
-showBank();
-
-}
-
-
-/* ========================================= */
-/* ZOBRAZENÍ BANKY */
-/* ========================================= */
-
-function showBank(){
 
 document
 .getElementById("login")
 .classList.add("hidden");
 
+
 document
 .getElementById("authenticator")
 .classList.add("hidden");
 
+
 document
 .getElementById("bank")
 .style.display="block";
+
 
 updateAccount();
 
@@ -1540,7 +1177,7 @@ updateAccount();
 
 
 /* ========================================= */
-/* ZPĚT NA LOGIN */
+/* ZPĚT */
 /* ========================================= */
 
 async function backToLogin(){
@@ -1570,9 +1207,11 @@ document
 .getElementById("authenticator")
 .classList.add("hidden");
 
+
 document
 .getElementById("bank")
 .style.display="none";
+
 
 document
 .getElementById("login")
@@ -1583,17 +1222,40 @@ document
 .getElementById("loginIdentity")
 .value="";
 
+
 document
 .getElementById("loginPassword")
 .value="";
+
 
 document
 .getElementById("authCode")
 .value="";
 
+
 document
 .getElementById("loginMsg")
 .innerHTML="";
+
+
+document
+.getElementById("authQr")
+.innerHTML="";
+
+
+document
+.getElementById("authQr")
+.style.display="none";
+
+
+document
+.getElementById("authSecret")
+.innerHTML="";
+
+
+document
+.getElementById("authSecret")
+.style.display="none";
 
 }
 
@@ -1655,16 +1317,6 @@ String(currentClient.auth)==="1"
 "❌ Vypnutý";
 
 
-document
-.getElementById("profileAuthStatus")
-.innerHTML=
-String(currentClient["auth-status"])==="1"
-?
-"✅ Nastavený"
-:
-"❌ Nenastavený";
-
-
 loadHistory();
 
 }
@@ -1689,13 +1341,9 @@ console.error(error);
 
 
 currentClient=null;
-
 pendingClient=null;
-
 authenticatorVerified=false;
-
 totpFactorId=null;
-
 totpSecret=null;
 
 
@@ -1703,9 +1351,11 @@ document
 .getElementById("bank")
 .style.display="none";
 
+
 document
 .getElementById("authenticator")
 .classList.add("hidden");
+
 
 document
 .getElementById("login")
@@ -1716,9 +1366,11 @@ document
 .getElementById("loginIdentity")
 .value="";
 
+
 document
 .getElementById("loginPassword")
 .value="";
+
 
 document
 .getElementById("authCode")
@@ -1801,7 +1453,6 @@ return;
 
 
 sendReceiver=result.data;
-
 sendAmount=amount;
 
 
@@ -1962,6 +1613,7 @@ document
 .getElementById("sendConfirm")
 .style.display="none";
 
+
 document
 .getElementById("sendPin")
 .value="";
@@ -2111,7 +1763,6 @@ return;
 
 
 qrReceiver=result.data;
-
 qrAmount=amount;
 
 
@@ -2302,6 +1953,7 @@ updateAccount();
 document
 .getElementById("qrConfirm")
 .style.display="none";
+
 
 document
 .getElementById("qrPin")
